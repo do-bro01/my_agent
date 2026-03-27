@@ -71,6 +71,7 @@ def run_agent(user_input: str):
 
     max_steps = 5
     last_search_result = None  # 마지막 검색 결과 보관
+    task_done = False  # 파일 쓰기 완료 여부
 
     for step in range(max_steps):
         print(f"\n[Step {step + 1}] LLM 호출 중...")
@@ -123,6 +124,15 @@ def run_agent(user_input: str):
                 "role": "tool",
                 "content": result
             })
+
+            # 파일 저장 성공 시 즉시 종료
+            if tool_name in ("write_file", "append_file") and "[완료]" in result:
+                print(f"\n에이전트 완료: 파일 저장 성공 → 루프 종료")
+                task_done = True
+                break  # 내부 tool 루프 종료
+
+        if task_done:
+            break  # 외부 step 루프 종료
 
     else:
         print("\n[경고] 최대 툴 호출 횟수에 도달했습니다.")
